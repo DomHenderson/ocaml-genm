@@ -678,6 +678,10 @@ else
                      echo "#define ARCH_SIXTYFOUR" >> m.h
                      set 4 4 8 2 8
                      arch64=true;;
+    genm*) inf "X86-64 configuration hardcoded: sizes.c"
+             echo "#define ARCH_SIXTYFOUR" >> m.h
+             set 4 4 8 2 8
+             arch64=true;;
     *) err "Since datatype sizes cannot be guessed when cross-compiling,\n" \
            "a hardcoded list is used but your architecture isn't known yet.\n" \
            "You need to determine the sizes yourself.\n" \
@@ -717,6 +721,8 @@ case $? in
   *) case $target in
        *-*-mingw*) inf "This is a little-endian architecture."
                    echo "#undef ARCH_BIG_ENDIAN" >> m.h;;
+       genm*) inf "X86-64 configuration hardcoded: endian.c"
+              echo "#undef ARCH_BIG_ENDIAN" >> m.h;;
        *) wrn "Something went wrong during endianness determination.\n" \
               "You will have to figure out endianness yourself\n" \
               "(option ARCH_BIG_ENDIAN in m.h).";;
@@ -752,6 +758,8 @@ case "$target" in
       *) case "$target" in
            *-*-mingw*) inf "Doubles can be word-aligned."
                        echo "#undef ARCH_ALIGN_DOUBLE" >> m.h;;
+           genm*) inf "X86_64 configuration hardcoded: dblalign.c"
+                  echo "#undef ARCH_ALIGN_DOUBLE" >> m.h;;
            *) wrn "Something went wrong during alignment determination for" \
                   "doubles.\n" \
                   "We will assume alignment constraints over doubles.\n" \
@@ -773,6 +781,7 @@ case "$target" in
       echo "#define ARCH_ALIGN_INT64" >> m.h
     fi;;
   *-*-mingw*) true;; # Nothing is in config/m-nt.h so don't add anything.
+  genm*) true;;
   *)
     sh ./runtest int64align.c
     case $? in
@@ -1004,6 +1013,7 @@ case "$target" in
   x86_64-*-mingw*)              arch=amd64; system=mingw;;
   aarch64-*-linux*)             arch=arm64; system=linux;;
   x86_64-*-cygwin*)             arch=amd64; system=cygwin;;
+  genm*)                        arch=genm; system=macosx;;
 esac
 
 # Some platforms exist both in 32-bit and 64-bit variants, not distinguished
@@ -1062,6 +1072,8 @@ case "$arch,$system" in
                   aspp="${TOOLPREF}cc -c";;
   *,freebsd)      as="${TOOLPREF}as"
                   aspp="${TOOLPREF}cc -c";;
+  genm,*)         as="genm-gcc"
+                  aspp="genm-gcc -c";;
   amd64,*|arm,*|arm64,*|i386,*|power,bsd*|power,netbsd)
                   as="${TOOLPREF}as"
                   case "$ccfamily" in
@@ -1620,6 +1632,8 @@ if test "$pthread_wanted" = "yes"; then
     *-*-openbsd*)  pthread_link="-pthread"
                    pthread_caml_link="-cclib -pthread";;
     *-*-haiku*)    pthread_link=""
+                   pthread_caml_link="";;
+    genm*)         pthread_link=""
                    pthread_caml_link="";;
     *)             pthread_link="-lpthread"
                    pthread_caml_link="-cclib -lpthread";;

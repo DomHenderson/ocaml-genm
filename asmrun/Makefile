@@ -155,7 +155,7 @@ $(LINKEDFILES): %.c: ../byterun/%.c
 	$(CC) -c $(PICFLAGS) $(CPPFLAGS) $(OUTPUTOBJ)$@ $<
 
 %.$(O): %.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $<
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(OUTPUTOBJ)$@ $<
 
 %.o: %.S
 	$(ASPP) $(ASPPFLAGS) -o $@ $< || \

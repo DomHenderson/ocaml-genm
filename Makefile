@@ -469,7 +469,6 @@ opt:
 # Native-code versions of the tools
 .PHONY: opt.opt
 opt.opt:
-	$(MAKE) checkstack
 	$(MAKE) runtime
 	$(MAKE) core
 	$(MAKE) ocaml
@@ -509,7 +508,7 @@ coreboot:
 all: runtime
 	$(MAKE) coreall
 	$(MAKE) ocaml
-	$(MAKE) otherlibraries $(WITH_DEBUGGER) $(WITH_OCAMLDOC) ocamltest
+	$(MAKE) otherlibraries $(WITH_DEBUGGER) $(WITH_OCAMLDOC)
 
 # Bootstrap and rebuild the whole system.
 # The compilation of ocaml will fail if the runtime has changed.
