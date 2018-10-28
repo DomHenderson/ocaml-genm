@@ -24,6 +24,10 @@ open Reg
 
 type alloc_site = { gc_lbl: label; gc_ret: label }
 
+let if_some v f = match v with
+  | None -> ()
+  | Some v -> f v
+
 let emit_symbol s = emit_string "_"; Emitaux.emit_symbol '$' s
 
 let emit_label lbl = emit_string ".L"; emit_int lbl
@@ -362,9 +366,9 @@ let emit_linear fast body =
           `  cmp.{emit_string cc}.u64 {emit_temp flag}, {emit_reg arg.(0)}, {emit_temp imm}\n`;
           `  jt {emit_temp flag}, {emit_label lbl}\n`
         in
-        lbl_lt |> Option.iter (emit "lt");
-        lbl_eq |> Option.iter (emit "eq");
-        lbl_gt |> Option.iter (emit "gt")
+        if_some lbl_lt (emit "lt");
+        if_some lbl_eq (emit "eq");
+        if_some lbl_gt (emit "gt")
     | Lswitch(labels) ->
       `  switch {emit_reg arg.(0)}, `;
       let n = Array.length labels in
@@ -425,7 +429,7 @@ let emit_linear fast body =
   );
 
   (* Emit bound error call *)
-  !bound_error_label |> Option.iter (fun label ->
+  if_some !bound_error_label (fun label ->
     `{emit_label label}:\n`;
     let addr = emit_addr "caml_ml_array_bound_error" in
     `  tcall {emit_temp addr}\n`;
