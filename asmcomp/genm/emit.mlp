@@ -28,7 +28,7 @@ let if_some v f = match v with
   | None -> ()
   | Some v -> f v
 
-let emit_symbol s = emit_string "_"; Emitaux.emit_symbol '$' s
+let emit_symbol s = emit_string "_"; Emitaux.emit_symbol '.' s
 
 let emit_label lbl = emit_string ".L"; emit_int lbl
 
@@ -405,8 +405,10 @@ let emit_linear fast body =
       | Cmm.Raise_notrace ->
         let exc_val = make_temp () in
         let ret_val = make_temp () in
+        let sp_val = make_temp () in
         let exc_addr = emit_addr "caml_exception_pointer" in
-        `  ld.8.u64 $sp, [{emit_temp exc_addr}]\n`;
+        `  ld.8.u64 {emit_temp sp_val}, [{emit_temp exc_addr}]\n`;
+        `  set.i64 $sp, {emit_temp sp_val}\n`;
         `  pop.i64 {emit_temp exc_val}\n`;
         `  st.8.u64 [{emit_temp exc_addr}], {emit_temp exc_val}\n`;
         `  pop.i64 {emit_temp ret_val}\n`;
