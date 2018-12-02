@@ -44,9 +44,9 @@ endif
 
 CPPFLAGS += -DSYS_$(SYSTEM) $(IFLEXDIR) $(LIBUNWIND_INCLUDE_FLAGS)
 
-ifneq "$(CCOMPTYPE)" "msvc"
-CFLAGS += -g
-endif
+#ifneq "$(CCOMPTYPE)" "msvc"
+#CFLAGS += -g
+#endif
 
 ifeq "$(TOOLCHAIN)" "msvc"
 DFLAGS = $(CFLAGS) -DDEBUG

@@ -63,9 +63,9 @@ endif
 
 CFLAGS += $(IFLEXDIR)
 
-ifneq "$(CCOMPTYPE)" "msvc"
-CFLAGS += -g
-endif
+#ifneq "$(CCOMPTYPE)" "msvc"
+#CFLAGS += -g
+#endif
 
 DFLAGS=$(CFLAGS) -DDEBUG
 IFLAGS=$(CFLAGS) -DCAML_INSTR
