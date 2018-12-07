@@ -234,13 +234,15 @@ let make_startup_file ppf units_list =
                in
                  (unit.ui_name, intf_crc, crc, unit.ui_defines))
           units_list));
+  (*
   compile_phrase(Cmmgen.data_segment_table ("_startup" :: name_list));
   compile_phrase(Cmmgen.code_segment_table ("_startup" :: name_list));
   let all_names = "_startup" :: "_system" :: name_list in
-  (* compile_phrase (Cmmgen.frame_table all_names); *)
+  compile_phrase (Cmmgen.frame_table all_names);
   if Config.spacetime then begin
     compile_phrase (Cmmgen.spacetime_shapes all_names);
   end;
+  *)
   if !Clflags.output_complete_object then
     force_linking_of_startup ppf;
   Emit.end_assembly ()
