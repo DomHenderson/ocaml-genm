@@ -378,23 +378,30 @@ fi
 if test -z "$ccoption"; then
   if sh ./searchpath "${TOOLPREF}gcc"; then
     cc="${TOOLPREF}gcc"
+    if [ "$target" = "genm" ]; then
+      tcc="gcc"
+    else
+      tcc="$cc"
+    fi
   else
     if $cross_compiler; then
       err "No cross-compiler found for ${target}.\n" \
           "It should be named ${TOOLPREF}gcc and be in the PATH."
     else
       cc="cc"
+      tcc="cc"
     fi
   fi
 else
   cc="$ccoption"
+  tcc="$ccoption"
 fi
 
 inf "Using compiler $cc."
 
 # Configure compiler to use in further tests.
 
-export cc verbose
+export cc tcc verbose
 
 # Determine the C compiler family (GCC, Clang, etc)
 
@@ -483,12 +490,11 @@ esac
 internal_cppflags="-DCAML_NAME_SPACE $internal_cppflags"
 
 # Adjust according to target
-
-case "$cc,$target" in
-  *,*-*-rhapsody*)
+case "$cc,$target,$host" in
+  *,*-*-rhapsody*,*|*,genm,*-*-rhapsody*)
     common_cppflags="-DSHRINKED_GNUC $common_cppflags"
     mathlib="";;
-  *,*-*-darwin*)
+  *,*-*-darwin*,*|*,genm,*-*-darwin*)
     mathlib=""
     mkexe="$mkexe -Wl,-no_compact_unwind"
     # Tell gcc that we can use 32-bit code addresses for threaded code
@@ -496,13 +502,13 @@ case "$cc,$target" in
     echo "#ifndef __PIC__" >> m.h
     echo "#  define ARCH_CODE32" >> m.h
     echo "#endif" >> m.h;;
-  *,*-*-haiku*)
+  *,*-*-haiku*,*|*,genm,*-*-haiku*)
     # No -lm library
     mathlib="";;
-  *,*-*-beos*)
+  *,*-*-beos*,*|*,genm,*-*-beos*)
     # No -lm library
     mathlib="";;
-  *gcc,alpha*-*-osf*)
+  *gcc,alpha*-*-osf*,*|*gcc,genm,alpha*-*-osf*)
     if sh ./hasgot -mieee; then
       common_cflags="-mieee $common_cflags";
     fi
@@ -510,22 +516,22 @@ case "$cc,$target" in
     ldflags="-Wl,-T,12000000 -Wl,-D,14000000"
     # Tell gcc that we can use 32-bit code addresses for threaded code
     echo "#define ARCH_CODE32" >> m.h;;
-  cc,alpha*-*-osf*)
+  cc,alpha*-*-osf*,*|cc,genm,alpha*-*-osf*)
     common_cflags="-std1 -ieee";;
-  *gcc*,alpha*-*-linux*)
+  *gcc*,alpha*-*-linux*,*|*gcc*,genm,alpha*-*-linux*)
     if sh ./hasgot -mieee; then
       common_cflags="-mieee $common_cflags";
     fi;;
-  *,mips-*-irix6*)
+  *,mips-*-irix6*,*|*,genm,mips-*-irix6*)
     # Turn off warning "unused library"
     ldflags="-n32 -Wl,-woff,84";;
-  *,alpha*-*-unicos*)
+  *,alpha*-*-unicos*,*|*,genm,alpha*-*-unicos*)
     # For the Cray T3E
     common_cppflags="$common_cppflags -DUMK";;
-  *,powerpc-*-aix*)
+  *,powerpc-*-aix*,*|*,genm,powerpc-*-aix*)
     # Avoid name-space pollution by requiring Unix98-conformant includes
     common_cppflags="$common_cppflags -D_XOPEN_SOURCE=500 -D_ALL_SOURCE";;
-  *,*-*-cygwin*)
+  *,*-*-cygwin*,*|*,genm,*-*-cygwin*)
     case $target in
       i686-*) flavor=cygwin;;
       x86_64-*) flavor=cygwin64;;
@@ -550,7 +556,7 @@ case "$cc,$target" in
     fi
     exe=".exe"
     ostype="Cygwin";;
-  *,*-*-mingw*)
+  *,*-*-mingw*,*|*,genm,*-*-mingw*)
     if $with_sharedlibs; then
       case "$target" in
         i686-*-*)   flexlink_chain="mingw";;
@@ -572,7 +578,7 @@ case "$cc,$target" in
     TOOLCHAIN="mingw"
     SO="dll"
     ;;
-  *,x86_64-*-linux*)
+  *,x86_64-*-linux*,*|*,genm,x86_64-*-linux*)
     # Tell gcc that we can use 32-bit code addresses for threaded code
     # unless we are compiled for a shared library (-fPIC option)
     echo "#ifndef __PIC__" >> m.h
