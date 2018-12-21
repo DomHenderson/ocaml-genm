@@ -28,8 +28,7 @@ MKEXE_ANSI=$(MKEXE)
 endif
 
 ocamlyacc$(EXE): $(OBJS)
-	touch $@
-	#$(MKEXE_ANSI) -o ocamlyacc$(EXE) $(OBJS) $(EXTRALIBS)
+	$(MKEXE_ANSI) -o ocamlyacc$(EXE) $(OBJS) $(EXTRALIBS)
 
 version.h : ../VERSION
 	echo "#define OCAML_VERSION \"`sed -e 1q $^ | tr -d '\r'`\"" > $@

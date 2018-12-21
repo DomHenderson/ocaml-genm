@@ -387,9 +387,9 @@ beforedepend:: utils/config.ml
 .PHONY: coldstart
 coldstart:
 	$(MAKE) -C byterun $(BOOT_FLEXLINK_CMD) all
-	cp byterun/ocamlrun$(EXE) boot/ocamlrun$(EXE)
-	$(MAKE) -C yacc $(BOOT_FLEXLINK_CMD) all
-	cp yacc/ocamlyacc$(EXE) boot/ocamlyacc$(EXE)
+	#cp byterun/ocamlrun$(EXE) boot/ocamlrun$(EXE)
+	#$(MAKE) -C yacc $(BOOT_FLEXLINK_CMD) all
+	#cp yacc/ocamlyacc$(EXE) boot/ocamlyacc$(EXE)
 	$(MAKE) -C stdlib $(BOOT_FLEXLINK_CMD) \
 	  COMPILER="../boot/ocamlc -use-prims ../byterun/primitives" all
 	cd stdlib; cp $(LIBFILES) ../boot
@@ -604,7 +604,7 @@ install:
 	$(INSTALL_PROG) ocamlc "$(INSTALL_BINDIR)/ocamlc.byte$(EXE)"
 	$(MAKE) -C stdlib install
 	$(INSTALL_PROG) lex/ocamllex "$(INSTALL_BINDIR)/ocamllex.byte$(EXE)"
-	$(INSTALL_PROG) yacc/ocamlyacc$(EXE) "$(INSTALL_BINDIR)/ocamlyacc$(EXE)"
+	#$(INSTALL_PROG) yacc/ocamlyacc$(EXE) "$(INSTALL_BINDIR)/ocamlyacc$(EXE)"
 	$(INSTALL_DATA) \
 	   utils/*.cmi utils/*.cmt utils/*.cmti utils/*.mli \
 	   parsing/*.cmi parsing/*.cmt parsing/*.cmti parsing/*.mli \

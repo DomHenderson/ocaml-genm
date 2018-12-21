@@ -106,7 +106,7 @@ IOBJS=$(OBJS:.$(O)=.i.$(O))
 PICOBJS=$(OBJS:.$(O)=.pic.$(O))
 
 .PHONY: all
-all: $(LIBRARIES) $(DYNLIBRARIES) $(PROGRAMS)
+all: $(LIBRARIES) $(DYNLIBRARIES) primitives #$(PROGRAMS)
 
 ld.conf: ../config/Makefile
 	echo "$(STUBLIBDIR)" > $@
@@ -116,7 +116,7 @@ INSTALL_INCDIR=$(INSTALL_LIBDIR)/caml
 
 .PHONY: install
 install:
-	$(INSTALL_PROG) $(PROGRAMS) "$(INSTALL_BINDIR)"
+	#$(INSTALL_PROG) $(PROGRAMS) "$(INSTALL_BINDIR)"
 	$(INSTALL_DATA) $(LIBRARIES) "$(INSTALL_LIBDIR)"
 	if test -n "$(DYNLIBRARIES)"; then \
 	  $(INSTALL_PROG) $(DYNLIBRARIES) "$(INSTALL_LIBDIR)"; \
