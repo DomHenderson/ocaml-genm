@@ -58,8 +58,8 @@ CAMLRUN ?= boot/ocamlrun
 CAMLYACC ?= boot/ocamlyacc
 include stdlib/StdlibModules
 
-CAMLC=$(CAMLRUN) boot/ocamlc -nostdlib -I boot -use-prims byterun/primitives
-CAMLOPT=$(CAMLRUN) ./ocamlopt -nostdlib -I stdlib -I otherlibs/dynlink
+CAMLC=$(CAMLRUN) boot/ocamlc $(G) -nostdlib -I boot -use-prims byterun/primitives
+CAMLOPT=$(CAMLRUN) ./ocamlopt $(G) -nostdlib -I stdlib -I otherlibs/dynlink
 ARCHES=amd64 i386 arm arm64 power s390x
 INCLUDES=-I utils -I parsing -I typing -I bytecomp -I middle_end \
         -I middle_end/base_types -I asmcomp -I asmcomp/debug \
@@ -387,9 +387,11 @@ beforedepend:: utils/config.ml
 .PHONY: coldstart
 coldstart:
 	$(MAKE) -C byterun $(BOOT_FLEXLINK_CMD) all
-	#cp byterun/ocamlrun$(EXE) boot/ocamlrun$(EXE)
-	#$(MAKE) -C yacc $(BOOT_FLEXLINK_CMD) all
-	#cp yacc/ocamlyacc$(EXE) boot/ocamlyacc$(EXE)
+ifeq "$(CROSS_COMPILER)" "false"
+	cp byterun/ocamlrun$(EXE) boot/ocamlrun$(EXE)
+	$(MAKE) -C yacc $(BOOT_FLEXLINK_CMD) all
+	cp yacc/ocamlyacc$(EXE) boot/ocamlyacc$(EXE)
+endif
 	$(MAKE) -C stdlib $(BOOT_FLEXLINK_CMD) \
 	  COMPILER="../boot/ocamlc -use-prims ../byterun/primitives" all
 	cd stdlib; cp $(LIBFILES) ../boot
@@ -399,7 +401,10 @@ coldstart:
 .PHONY: coreall
 coreall:
 	$(MAKE) ocamlc
-	$(MAKE) ocamllex ocamlyacc ocamltools library
+ifeq "$(CROSS_COMPILER)" "false"
+	$(MAKE) ocamllex ocamlyacc ocamltools
+endif
+	$(MAKE) library
 
 # Build the core system: the minimum needed to make depend and bootstrap
 .PHONY: core
@@ -469,16 +474,29 @@ opt:
 # Native-code versions of the tools
 .PHONY: opt.opt
 opt.opt:
+	$(MAKE) checkstack
 	$(MAKE) runtime
 	$(MAKE) core
 	$(MAKE) ocaml
 	$(MAKE) opt-core
-	$(MAKE) otherlibraries $(WITH_DEBUGGER) $(WITH_OCAMLDOC)
+	$(MAKE) ocamlc.opt
+	$(MAKE) otherlibraries
+ifeq "$(CROSS_COMPILER)" "false"
+	$(MAKE) $(WITH_DEBUGGER) $(WITH_OCAMLDOC) ocamltest
+endif
+	$(MAKE) ocamlopt.opt
 	$(MAKE) otherlibrariesopt
+ifeq "$(CROSS_COMPILER)" "false"
+	$(MAKE) ocamllex.opt
+	$(MAKE) ocamltoolsopt ocamltoolsopt.opt
+	$(MAKE) $(OCAMLDOC_OPT)
+	$(MAKE) ocamltest.opt
+endif
 
 # Core bootstrapping cycle
 .PHONY: coreboot
 coreboot:
+ifeq "$(CROSS_COMPILER)" "false"
 # Save the original bootstrap compiler
 	$(MAKE) backup
 # Promote the new compiler but keep the old runtime
@@ -497,6 +515,7 @@ coreboot:
 	$(MAKE) core
 # Check if fixpoint reached
 	$(MAKE) compare
+endif
 
 # Recompile the system using the bootstrap compiler
 
@@ -504,7 +523,10 @@ coreboot:
 all: runtime
 	$(MAKE) coreall
 	$(MAKE) ocaml
-	$(MAKE) otherlibraries $(WITH_DEBUGGER) $(WITH_OCAMLDOC)
+	$(MAKE) otherlibraries
+ifeq "$(CROSS_COMPILER)" "false"
+	$(MAKE) $(WITH_DEBUGGER) $(WITH_OCAMLDOC) ocamltest
+endif
 
 # Bootstrap and rebuild the whole system.
 # The compilation of ocaml will fail if the runtime has changed.
@@ -603,8 +625,10 @@ install:
 	$(INSTALL_PROG) ocaml "$(INSTALL_BINDIR)/ocaml$(EXE)"
 	$(INSTALL_PROG) ocamlc "$(INSTALL_BINDIR)/ocamlc.byte$(EXE)"
 	$(MAKE) -C stdlib install
+ifeq "$(CROSS_COMPILER)" "false"
 	$(INSTALL_PROG) lex/ocamllex "$(INSTALL_BINDIR)/ocamllex.byte$(EXE)"
-	#$(INSTALL_PROG) yacc/ocamlyacc$(EXE) "$(INSTALL_BINDIR)/ocamlyacc$(EXE)"
+	$(INSTALL_PROG) yacc/ocamlyacc$(EXE) "$(INSTALL_BINDIR)/ocamlyacc$(EXE)"
+endif
 	$(INSTALL_DATA) \
 	   utils/*.cmi utils/*.cmt utils/*.cmti utils/*.mli \
 	   parsing/*.cmi parsing/*.cmt parsing/*.cmti parsing/*.mli \
@@ -689,6 +713,9 @@ installopt:
 	   $(LN) ocamlopt.byte$(EXE) ocamlopt$(EXE); \
 	   $(LN) ocamllex.byte$(EXE) ocamllex$(EXE); \
 	fi
+ifeq "$(CROSS_COMPILER)" "false"
+	$(MAKE) -C tools installopt
+endif
 	if test -f ocamlopt.opt -a -f flexdll/flexlink.opt ; then \
 	  $(INSTALL_PROG) \
 	    flexdll/flexlink.opt "$(INSTALL_BINDIR)/flexlink$(EXE)" ; \
@@ -698,12 +725,15 @@ installopt:
 installoptopt:
 	$(INSTALL_PROG) ocamlc.opt "$(INSTALL_BINDIR)/ocamlc.opt$(EXE)"
 	$(INSTALL_PROG) ocamlopt.opt "$(INSTALL_BINDIR)/ocamlopt.opt$(EXE)"
+ifeq "$(CROSS_COMPILER)" "false"
 	$(INSTALL_PROG) \
 	  lex/ocamllex.opt "$(INSTALL_BINDIR)/ocamllex.opt$(EXE)"
-	cd "$(INSTALL_BINDIR)"; \
-	   $(LN) ocamlc.opt$(EXE) ocamlc$(EXE); \
-	   $(LN) ocamlopt.opt$(EXE) ocamlopt$(EXE); \
-	   $(LN) ocamllex.opt$(EXE) ocamllex$(EXE)
+endif
+	cd "$(INSTALL_BINDIR)"; $(LN) ocamlc.opt$(EXE) ocamlc$(EXE)
+	cd "$(INSTALL_BINDIR)"; $(LN) ocamlopt.opt$(EXE) ocamlopt$(EXE)
+ifeq "$(CROSS_COMPILER)" "false"
+	cd "$(INSTALL_BINDIR)"; $(LN) ocamllex.opt$(EXE) ocamllex$(EXE)
+endif
 	$(INSTALL_DATA) \
 	   utils/*.cmx parsing/*.cmx typing/*.cmx bytecomp/*.cmx \
 	   driver/*.cmx asmcomp/*.cmx \
@@ -1110,7 +1140,7 @@ partialclean::
 # Check that the stack limit is reasonable (Unix-only)
 .PHONY: checkstack
 checkstack:
-ifeq "$(UNIX_OR_WIN32)" "unix"
+ifeq "$(UNIX_OR_WIN32),$(CROSS_COMPILER)" "unix,false"
 	if $(MKEXE) $(OUTPUTEXE)tools/checkstack$(EXE) tools/checkstack.c; \
 	  then tools/checkstack$(EXE); \
 	fi
@@ -1149,21 +1179,32 @@ partialclean::
 	      compilerlibs/ocamlmiddleend.$(A)
 
 # Tools
-
-.PHONY: ocamltools
+ifeq "$(CROSS_COMPILER)" "false"
 ocamltools: ocamlc ocamlyacc ocamllex asmcomp/cmx_format.cmi \
             asmcomp/printclambda.cmo compilerlibs/ocamlmiddleend.cma \
             asmcomp/export_info.cmo
-	$(MAKE) -C tools all
 
-.PHONY: ocamltoolsopt
-ocamltoolsopt: ocamlopt
-	$(MAKE) -C tools opt
-
-.PHONY: ocamltoolsopt.opt
 ocamltoolsopt.opt: ocamlc.opt ocamlyacc ocamllex.opt asmcomp/cmx_format.cmi \
                    asmcomp/printclambda.cmx compilerlibs/ocamlmiddleend.cmxa \
                    asmcomp/export_info.cmx
+else
+ocamltools: ocamlc asmcomp/cmx_format.cmi \
+            asmcomp/printclambda.cmo compilerlibs/ocamlmiddleend.cma \
+            asmcomp/export_info.cmo
+
+ocamltoolsopt.opt: ocamlc.opt asmcomp/cmx_format.cmi \
+                   asmcomp/printclambda.cmx compilerlibs/ocamlmiddleend.cmxa \
+                   asmcomp/export_info.cmx
+endif
+
+.PHONY: ocamltools ocamltoolsopt ocamltoolsopt.opt
+ocamltools:
+	$(MAKE) -C tools all
+
+ocamltoolsopt: ocamlopt
+	$(MAKE) -C tools opt
+
+ocamltoolsopt.opt:
 	$(MAKE) -C tools opt.opt
 
 partialclean::

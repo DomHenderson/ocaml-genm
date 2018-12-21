@@ -63,9 +63,12 @@ endif
 
 CFLAGS += $(IFLEXDIR)
 
-#ifneq "$(CCOMPTYPE)" "msvc"
-#CFLAGS += -g
-#endif
+
+ifeq "$(CROSS_COMPILER)" "false"
+ifneq "$(CCOMPTYPE)" "msvc"
+CFLAGS += -g
+endif
+endif
 
 DFLAGS=$(CFLAGS) -DDEBUG
 IFLAGS=$(CFLAGS) -DCAML_INSTR
@@ -106,7 +109,11 @@ IOBJS=$(OBJS:.$(O)=.i.$(O))
 PICOBJS=$(OBJS:.$(O)=.pic.$(O))
 
 .PHONY: all
-all: $(LIBRARIES) $(DYNLIBRARIES) primitives #$(PROGRAMS)
+ifeq "$(CROSS_COMPILER)" "false"
+all: $(LIBRARIES) $(DYNLIBRARIES) $(PROGRAMS)
+else
+all: $(LIBRARIES) $(DYNLIBRARIES) primitives
+endif
 
 ld.conf: ../config/Makefile
 	echo "$(STUBLIBDIR)" > $@
@@ -116,7 +123,9 @@ INSTALL_INCDIR=$(INSTALL_LIBDIR)/caml
 
 .PHONY: install
 install:
-	#$(INSTALL_PROG) $(PROGRAMS) "$(INSTALL_BINDIR)"
+ifeq "$(CROSS_COMPILER)" "false"
+	$(INSTALL_PROG) $(PROGRAMS) "$(INSTALL_BINDIR)"
+endif
 	$(INSTALL_DATA) $(LIBRARIES) "$(INSTALL_LIBDIR)"
 	if test -n "$(DYNLIBRARIES)"; then \
 	  $(INSTALL_PROG) $(DYNLIBRARIES) "$(INSTALL_LIBDIR)"; \
@@ -184,22 +193,19 @@ clean:
 	rm -f caml/version.h
 
 ocamlrun$(EXE): prims.$(O) libcamlrun.$(A)
-	touch $@
-	#$(call MAKE_OCAMLRUN,$@,$^ $(LIBS))
+	$(call MAKE_OCAMLRUN,$@,$^ $(LIBS))
 
 libcamlrun.$(A): $(OBJS)
 	$(call MKLIB,$@, $^)
 
 ocamlrund$(EXE): prims.$(O) libcamlrund.$(A)
-	touch $@
-	#$(MKEXE) $(MKEXEDEBUGFLAG) -o $@ $^ $(LIBS)
+	$(MKEXE) $(MKEXEDEBUGFLAG) -o $@ $^ $(LIBS)
 
 libcamlrund.$(A): $(DOBJS)
 	$(call MKLIB,$@, $^)
 
 ocamlruni$(EXE): prims.$(O) libcamlruni.$(A)
-	touch $@
-	#$(MKEXE) -o $@ $^ $(LIBS)
+	$(MKEXE) -o $@ $^ $(LIBS)
 
 libcamlruni.$(A): $(IOBJS)
 	$(call MKLIB,$@, $^)
