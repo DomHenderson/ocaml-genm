@@ -479,12 +479,14 @@ opt.opt:
 	$(MAKE) core
 	$(MAKE) ocaml
 	$(MAKE) opt-core
+ifeq "$(CROSS_COMPILER)" "false"
 	$(MAKE) ocamlc.opt
+endif
 	$(MAKE) otherlibraries
 ifeq "$(CROSS_COMPILER)" "false"
 	$(MAKE) $(WITH_DEBUGGER) $(WITH_OCAMLDOC) ocamltest
-endif
 	$(MAKE) ocamlopt.opt
+endif
 	$(MAKE) otherlibrariesopt
 ifeq "$(CROSS_COMPILER)" "false"
 	$(MAKE) ocamllex.opt
@@ -1192,7 +1194,7 @@ ocamltools: ocamlc asmcomp/cmx_format.cmi \
             asmcomp/printclambda.cmo compilerlibs/ocamlmiddleend.cma \
             asmcomp/export_info.cmo
 
-ocamltoolsopt.opt: ocamlc.opt asmcomp/cmx_format.cmi \
+ocamltoolsopt.opt: asmcomp/cmx_format.cmi \
                    asmcomp/printclambda.cmx compilerlibs/ocamlmiddleend.cmxa \
                    asmcomp/export_info.cmx
 endif
