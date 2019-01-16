@@ -787,7 +787,6 @@ case "$target" in
       echo "#define ARCH_ALIGN_INT64" >> m.h
     fi;;
   *-*-mingw*) true;; # Nothing is in config/m-nt.h so don't add anything.
-  genm*) true;;
   *)
     sh ./runtest int64align.c
     case $? in
