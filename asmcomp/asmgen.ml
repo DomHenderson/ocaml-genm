@@ -188,12 +188,13 @@ let end_gen_implementation ?toplevel ppf
      when part of a C library, won't be discarded by the linker.
      This is important if a module that uses such a symbol is later
      dynlinked. *)
-
+  (*
   compile_phrase ppf
     (Cmmgen.reference_symbols
        (List.filter (fun s -> s <> "" && s.[0] <> '%')
           (List.map Primitive.native_name !Translmod.primitive_declarations))
     );
+  *)
   Emit.end_assembly ()
 
 let flambda_gen_implementation ?toplevel ~backend ppf
