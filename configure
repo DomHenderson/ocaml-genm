@@ -463,7 +463,7 @@ esac
 
 case "$ccfamily" in
   clang-*)
-    common_cflags="-O2 -fno-strict-aliasing -fwrapv -fno-stack-protector -fomit-frame-pointer";
+    common_cflags="-O2 -fno-strict-aliasing -fwrapv -fno-stack-protector -fomit-frame-pointer -D_FORTIFY_SOURCE=0";
     internal_cflags="$gcc_warnings";;
   gcc-[012]-*)
     # Some versions known to miscompile OCaml, e,g, 2.7.2.1, some 2.96.
@@ -477,8 +477,7 @@ case "$ccfamily" in
     common_cflags="-std=gnu99 -O";
     internal_cflags="$gcc_warnings";;
   gcc-4-*)
-    common_cflags="-std=gnu99 -O2 -fno-strict-aliasing -fwrapv \
--fno-builtin-memcmp";
+    common_cflags="-std=gnu99 -O2 -fno-strict-aliasing -fwrapv -fno-builtin-memcmp";
     internal_cflags="$gcc_warnings";;
   gcc-*)
     common_cflags="-O2 -fno-strict-aliasing -fwrapv";
