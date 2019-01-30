@@ -148,6 +148,7 @@ _ocamltestd
 /lex/ocamllex
 /lex/ocamllex.opt
 /lex/parser.output
+/lex/ocamllex.S
 
 /manual/manual/cmds/warnings-help.etex
 /manual/manual/warnings-help.etex
