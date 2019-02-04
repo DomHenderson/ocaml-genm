@@ -50,7 +50,7 @@ rt.o:
 	gcc -c ../asmrun/genm_rt.S -o rt.o
 
 ocamllex.S: ocamllex.genm
-	genm ocamllex.genm -o ocamllex.S
+	genm ocamllex.genm -o ocamllex.S -opt
 
 ocamllex.o: ocamllex.S
 	gcc ocamllex.S -c -o ocamllex.o
