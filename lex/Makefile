@@ -46,17 +46,14 @@ allopt: ocamllex.opt
 ocamllex: $(OBJS)
 	$(CAMLC) $(LINKFLAGS) -compat-32 -o ocamllex $(OBJS)
 
-rt.o:
-	gcc -c ../asmrun/genm_rt.S -o rt.o
-
 ocamllex.S: ocamllex.genm
 	genm ocamllex.genm -o ocamllex.S -opt
 
 ocamllex.o: ocamllex.S
 	gcc ocamllex.S -c -o ocamllex.o
 
-ocamllex.opt: ocamllex.o rt.o
-	ld -lc rt.o ocamllex.o -o ocamllex.opt
+ocamllex.opt: ocamllex.o
+	ld -lc ocamllex.o -o ocamllex.opt
 
 ocamllex.genm: $(OBJS:.cmo=.cmx)
 	$(CAMLOPT) -o ocamllex.genm $(OBJS:.cmo=.cmx)
