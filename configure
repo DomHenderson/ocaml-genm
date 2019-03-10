@@ -427,8 +427,14 @@ esac
 # into shared libraries. It is passed to BYTECC for both C source files
 # in the OCaml distribution and third-party C source files compiled
 # with ocamlc.
-
-mkexe="\$(CC) \$(CFLAGS) \$(CPPFLAGS) \$(LDFLAGS)"
+case $target in
+  "genm")
+    mkexe="genm-ld"
+    ;;
+  *)
+    mkexe="\$(CC) \$(CFLAGS) \$(CPPFLAGS) \$(LDFLAGS)"
+    ;;
+esac
 mkexedebugflag="-g"
 common_cflags=""
 common_cppflags=""
@@ -494,6 +500,13 @@ case "$cc,$target,$host" in
     common_cppflags="-DSHRINKED_GNUC $common_cppflags"
     mathlib="";;
   *,*-*-darwin*,*|*,genm,*-*-darwin*)
+    mathlib=""
+    # Tell gcc that we can use 32-bit code addresses for threaded code
+    # unless we are compiled for a shared library (-fPIC option)
+    echo "#ifndef __PIC__" >> m.h
+    echo "#  define ARCH_CODE32" >> m.h
+    echo "#endif" >> m.h;;
+  *,*-*-darwin*,*|*,*,*-*-darwin*)
     mathlib=""
     mkexe="$mkexe -Wl,-no_compact_unwind"
     # Tell gcc that we can use 32-bit code addresses for threaded code

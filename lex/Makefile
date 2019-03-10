@@ -46,17 +46,8 @@ allopt: ocamllex.opt
 ocamllex: $(OBJS)
 	$(CAMLC) $(LINKFLAGS) -compat-32 -o ocamllex $(OBJS)
 
-ocamllex.S: ocamllex.genm
-	genm ocamllex.genm -o ocamllex.S -opt
-
-ocamllex.o: ocamllex.S
-	gcc ocamllex.S -c -o ocamllex.o
-
-ocamllex.opt: ocamllex.o
-	ld -lc ocamllex.o -o ocamllex.opt
-
-ocamllex.genm: $(OBJS:.cmo=.cmx)
-	$(CAMLOPT) -o ocamllex.genm $(OBJS:.cmo=.cmx)
+ocamllex.opt: $(OBJS:.cmo=.cmx)
+	$(CAMLOPT) -o ocamllex.opt $(OBJS:.cmo=.cmx)
 
 clean::
 	rm -f ocamllex ocamllex.opt

@@ -109,11 +109,7 @@ IOBJS=$(OBJS:.$(O)=.i.$(O))
 PICOBJS=$(OBJS:.$(O)=.pic.$(O))
 
 .PHONY: all
-ifeq "$(CROSS_COMPILER)" "false"
 all: $(LIBRARIES) $(DYNLIBRARIES) $(PROGRAMS)
-else
-all: $(LIBRARIES) $(DYNLIBRARIES) primitives
-endif
 
 ld.conf: ../config/Makefile
 	echo "$(STUBLIBDIR)" > $@
@@ -123,9 +119,7 @@ INSTALL_INCDIR=$(INSTALL_LIBDIR)/caml
 
 .PHONY: install
 install:
-ifeq "$(CROSS_COMPILER)" "false"
 	$(INSTALL_PROG) $(PROGRAMS) "$(INSTALL_BINDIR)"
-endif
 	$(INSTALL_DATA) $(LIBRARIES) "$(INSTALL_LIBDIR)"
 	if test -n "$(DYNLIBRARIES)"; then \
 	  $(INSTALL_PROG) $(DYNLIBRARIES) "$(INSTALL_LIBDIR)"; \

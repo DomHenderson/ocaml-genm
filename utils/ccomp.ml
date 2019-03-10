@@ -186,8 +186,6 @@ let call_linker mode output_name files extra =
         extra
     else
       Printf.sprintf "%s -o %s %s %s %s %s %s %s"
-        "genm-ld"
-        (*
         (match !Clflags.c_compiler, mode with
         | Some cc, _ -> cc
         | None, Exe -> Config.mkexe
@@ -195,7 +193,6 @@ let call_linker mode output_name files extra =
         | None, MainDll -> Config.mkmaindll
         | None, Partial -> assert false
         )
-        *)
         (Filename.quote output_name)
         (if !Clflags.gprofile then Config.cc_profile else "")
         ""  (*(Clflags.std_include_flag "-I")*)
