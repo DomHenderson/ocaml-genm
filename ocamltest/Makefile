@@ -182,7 +182,7 @@ ocamltest.opt$(EXE): $(native_modules)
 	$(ocamllex) -q $<
 
 %.$(O): %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(BYTECCCOMPOPTS) -c $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(BYTECCCOMPOPTS) -c $< -o $@
 
 ocamltest_config.ml: ocamltest_config.ml.in
 	sed \
