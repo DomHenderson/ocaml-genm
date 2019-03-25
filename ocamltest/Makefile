@@ -146,13 +146,13 @@ flags := -g -nostdlib $(include_directories) \
   -strict-sequence -safe-string -strict-formats \
   -w +a-4-9-41-42-44-45-48 -warn-error A
 
-ocamlc := $(FLEXLINK_ENV) $(OCAMLRUN) ../ocamlc $(flags)
+ocamlc := $(FLEXLINK_ENV) ../byterun/ocamlrun ../ocamlc $(flags)
 
-ocamlopt := $(FLEXLINK_ENV) $(OCAMLRUN) ../ocamlopt $(flags)
+ocamlopt := $(FLEXLINK_ENV) ../byterun/ocamlrun ../ocamlopt $(flags)
 
-ocamldep := $(OCAMLRUN) ../tools/ocamldep -slash
+ocamldep := ../byterun/ocamlrun ../tools/ocamldep -slash
 
-ocamllex := $(OCAMLRUN) ../lex/ocamllex
+ocamllex := ../byterun/ocamlrun ../lex/ocamllex
 
 ocamlyacc := ../yacc/ocamlyacc
 
