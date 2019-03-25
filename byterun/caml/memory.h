@@ -205,6 +205,25 @@ int caml_page_table_initialize(mlsize_t bytesize);
 #define DEBUG_clear(result, wosize)
 #endif
 
+value caml_alloc_young(mlsize_t wosize, tag_t tag, uintnat profinfo);
+
+#define Alloc_small_with_profinfo(result, wosize, tag, profinfo) { \
+  CAMLassert ((wosize) >= 1); \
+  CAMLassert ((tag_t) (tag) < 256); \
+  CAMLassert ((wosize) <= Max_young_wosize); \
+  (result) = caml_alloc_young(wosize, tag, profinfo); \
+}
+
+#if defined(NATIVE_CODE) && defined(WITH_SPACETIME)
+extern uintnat caml_spacetime_my_profinfo(struct ext_table**, uintnat);
+#define Alloc_small(result, wosize, tag) \
+  Alloc_small_with_profinfo(result, wosize, tag, \
+    caml_spacetime_my_profinfo(NULL, wosize))
+#else
+#define Alloc_small(result, wosize, tag) \
+  Alloc_small_with_profinfo(result, wosize, tag, (uintnat) 0)
+#endif
+
 /* Deprecated alias for [caml_modify] */
 
 #define Modify(fp,val) caml_modify((fp), (val))

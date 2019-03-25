@@ -63,11 +63,8 @@ endif
 
 CFLAGS += $(IFLEXDIR)
 
-
-ifeq "$(CROSS_COMPILER)" "false"
 ifneq "$(CCOMPTYPE)" "msvc"
 CFLAGS += -g
-endif
 endif
 
 DFLAGS=$(CFLAGS) -DDEBUG
@@ -211,7 +208,7 @@ libcamlrun_shared.$(SO): $(PICOBJS)
 	$(MKDLL) -o $@ $^ $(BYTECCLIBS)
 
 %.$(O): %.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(OUTPUTOBJ)$@ $<
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 %.$(DBGO): %.c
 	$(CC) -c $(DFLAGS) $(CPPFLAGS) $(OUTPUTOBJ)$@ $<

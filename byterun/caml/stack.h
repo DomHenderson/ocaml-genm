@@ -120,7 +120,7 @@ extern char * caml_exception_pointer;
 extern value * caml_globals[];
 extern char caml_globals_map[];
 extern intnat caml_globals_inited;
-extern frame_descr *caml_genm_frametable;
+extern intnat * caml_genm_frametable;
 
 CAMLextern frame_descr * caml_next_frame_descriptor(uintnat * pc, char ** sp);
 
