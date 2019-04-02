@@ -540,14 +540,15 @@ let build_custom_runtime prim_name exec_name =
     ([prim_name] @ List.rev !Clflags.ccobjs @ [runtime_lib])
     (Clflags.std_include_flag "-I" ^ " " ^ Config.bytecomp_c_libraries)
 
-let append_bytecode_and_cleanup bytecode_name exec_name prim_name =
+let append_bytecode_and_cleanup bytecode_name exec_name prim_name obj_name =
   let oc = open_out_gen [Open_wronly; Open_append; Open_binary] 0 exec_name in
   let ic = open_in_bin bytecode_name in
   copy_file ic oc;
   close_in ic;
   close_out oc;
   remove_file bytecode_name;
-  remove_file prim_name
+  remove_file prim_name;
+  remove_file obj_name
 
 (* Fix the name of the output file, if the C compiler changes it behind
    our back. *)
@@ -583,6 +584,7 @@ let link ppf objfiles output_name =
   else if not !Clflags.output_c_object then begin
     let bytecode_name = Filename.temp_file "camlcode" "" in
     let prim_name = Filename.temp_file "camlprim" ".c" in
+    let obj_name = Filename.temp_file "camlprim" ".o" in
     try
       link_bytecode ppf tolink bytecode_name false;
       let poc = open_out prim_name in
@@ -605,15 +607,22 @@ let link ppf objfiles output_name =
         }\n\
         #endif\n";
       close_out poc;
+      if Ccomp.compile_file ~output:obj_name prim_name <> 0
+      then raise(Error Custom_runtime);
       let exec_name = fix_exec_name output_name in
-      if not (build_custom_runtime prim_name exec_name)
+      if not (build_custom_runtime obj_name exec_name)
       then raise(Error Custom_runtime);
       if !Clflags.make_runtime
-      then (remove_file bytecode_name; remove_file prim_name)
-      else append_bytecode_and_cleanup bytecode_name exec_name prim_name
+      then begin
+        remove_file bytecode_name;
+        remove_file prim_name;
+        remove_file obj_name
+      end else
+        append_bytecode_and_cleanup bytecode_name exec_name prim_name obj_name
     with x ->
       remove_file bytecode_name;
       remove_file prim_name;
+      remove_file obj_name;
       raise x
   end else begin
     let basename = Filename.chop_extension output_name in
