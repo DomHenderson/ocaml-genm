@@ -26,7 +26,7 @@ let if_some v f = match v with
   | None -> ()
   | Some v -> f v
 
-let emit_symbol s = Emitaux.emit_symbol '.' s
+let emit_symbol s = Emitaux.emit_symbol '$' s
 
 let emit_label lbl = emit_string ".L"; emit_int lbl
 
