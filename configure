@@ -399,10 +399,6 @@ fi
 
 inf "Using compiler $cc."
 
-# Configure compiler to use in further tests.
-
-export cc tcc verbose
-
 # Determine the C compiler family (GCC, Clang, etc)
 
 ccfamily=`$cc -E cckind.c | grep '^[a-z]' | tr -s ' ' '-'`
@@ -590,9 +586,16 @@ case "$cc,$target,$host" in
     TOOLCHAIN="mingw"
     SO="dll"
     ;;
-  *,x86_64-*-linux*,*|*,genm,x86_64-*-linux*)
+  *,x86_64-*-linux*,*)
     # Tell gcc that we can use 32-bit code addresses for threaded code
     # unless we are compiled for a shared library (-fPIC option)
+    echo "#ifndef __PIC__" >> m.h
+    echo "#  define ARCH_CODE32" >> m.h
+    echo "#endif" >> m.h;;
+  *,genm,x86_64-*-linux*)
+    common_cflags="$common_cflags --sysroot $prefix/musl -nostdinc -isystem $prefix/musl/include"
+    tcc="$prefix/musl/bin/musl-gcc"
+    mathlib="";
     echo "#ifndef __PIC__" >> m.h
     echo "#  define ARCH_CODE32" >> m.h
     echo "#endif" >> m.h;;
@@ -600,7 +603,7 @@ esac
 
 # Configure compiler options to use in further tests.
 
-export cclibs ldflags
+export cc tcc verbose cflags cclibs ldflags
 
 # Check C compiler.
 
@@ -1031,6 +1034,7 @@ case "$target,$host" in
   aarch64-*-linux*,*)             arch=arm64; system=linux;;
   x86_64-*-cygwin*,*)             arch=amd64; system=cygwin;;
   genm,*-*-darwin*)               arch=genm; system=macosx;;
+  genm,*-*-linux*)                arch=genm; system=linux;;
 esac
 
 # Some platforms exist both in 32-bit and 64-bit variants, not distinguished
@@ -1506,17 +1510,22 @@ if sh ./hasgot -i locale.h && sh ./hasgot setlocale; then
 fi
 
 
-if sh ./hasgot $dllib dlopen; then
-  inf "dlopen() found."
-elif sh ./hasgot $dllib -ldl dlopen; then
-  inf "dlopen() found in -ldl."
-  dllib="$dllib -ldl"
-else
-  case "$target" in
-    *-*-mingw*) ;;
-    *) shared_libraries_supported=false
-  esac
-fi
+case "$target" in
+  genm*)
+    shared_libraries_supported=false;;
+  *)
+    if sh ./hasgot $dllib dlopen; then
+      inf "dlopen() found."
+    elif sh ./hasgot $dllib -ldl dlopen; then
+      inf "dlopen() found in -ldl."
+      dllib="$dllib -ldl"
+    else
+      case "$target" in
+        *-*-mingw*) ;;
+        *) shared_libraries_supported=false
+       esac
+    fi;;
+esac
 
 if $shared_libraries_supported; then
   inf "Dynamic loading of shared libraries is supported."
