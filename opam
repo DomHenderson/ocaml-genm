@@ -1,0 +1,39 @@
+opam-version: "2.0"
+name: "ocaml-variants"
+version: "4.07.1+genm"
+synopsis: "4.07.01 with the genm backend"
+maintainer: "n@ndor.email"
+authors: "n@ndor.email"
+homepage: "https://github.com/nandor/ocaml-genm"
+bug-reports: "https://github.com/nandor/ocaml-genm/issues"
+depends: [
+  "ocaml" {= "4.07.1" & post}
+  "base-unix" {post}
+  "base-bigarray" {post}
+  "base-threads" {post}
+]
+conflict-class: "ocaml-core-compiler"
+flags: compiler
+build: [
+  [
+    "./configure"
+    "--target"
+    "genm"
+    "--target-bindir"
+    prefix
+    "--prefix"
+    prefix
+    "-no-ocamldoc"
+    "-no-debugger"
+    "-no-instrumented-runtime"
+    "-no-cfi"
+    "-no-debug-runtime"
+    "-no-graph"
+    "-fPIC"
+    "-flambda"
+  ]
+  [make "world" "-j%{jobs}%"]
+  [make "world.opt" "-j%{jobs}%"]
+]
+install: [make "install"]
+dev-repo: "git+file:///home/dom/Dev/Projects/genm/ocaml#master"

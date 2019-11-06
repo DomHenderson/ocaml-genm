@@ -432,7 +432,7 @@ case $target in
     ;;
 esac
 mkexedebugflag="-g"
-common_cflags=""
+common_cflags="-I /home/dom/Dev/Projects/genm/dist/musl/include"
 common_cppflags=""
 internal_cflags=""
 internal_cppflags=""
