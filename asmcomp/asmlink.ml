@@ -206,7 +206,7 @@ let scan_file obj_name tolink = match read_file obj_name with
 let force_linking_of_startup ppf =
   Asmgen.compile_phrase ppf (Cmm.Cdata ([Cmm.Csymbol_address "caml_startup"]))
 
-let make_startup_file ppf units_list =
+let make_startup_file ppf units_list insert_timing_code =
   let compile_phrase p = Asmgen.compile_phrase ppf p in
   Location.input_name := "caml_startup"; (* set name of "current" input *)
   Compilenv.reset "_startup";
@@ -214,7 +214,7 @@ let make_startup_file ppf units_list =
   Emit.begin_assembly ();
   let name_list =
     List.flatten (List.map (fun (info,_,_) -> info.ui_defines) units_list) in
-  compile_phrase (Cmmgen.entry_point name_list);
+  compile_phrase (Cmmgen.entry_point (name_list, insert_timing_code));
   let units = List.map (fun (info,_,_) -> info) units_list in
   List.iter compile_phrase (Cmmgen.generic_functions false units);
   Array.iteri
@@ -352,7 +352,7 @@ let link ppf objfiles output_name =
     let startup_obj = Filename.temp_file "camlstartup" ext_obj in
     Asmgen.compile_unit output_name
       startup !Clflags.keep_startup_file startup_obj
-      (fun () -> make_startup_file ppf units_tolink);
+      (fun () -> make_startup_file ppf units_tolink !Clflags.insert_timing_code);
     Misc.try_finally
       (fun () ->
         call_linker (List.map object_file_name objfiles) startup_obj output_name)

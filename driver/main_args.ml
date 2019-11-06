@@ -789,6 +789,11 @@ let mk__ f =
   "<file>  Treat <file> as a file name (even if it starts with `-')"
 ;;
 
+let mk_insert_timing_code f =
+  "-insert-timing-code", Arg.Unit f,
+  "Insert instruction counting code into caml_program"
+;;
+
 module type Common_options = sig
   val _absname : unit -> unit
   val _I : string -> unit
@@ -829,6 +834,8 @@ module type Common_options = sig
   val _dtypedtree : unit -> unit
   val _drawlambda : unit -> unit
   val _dlambda : unit -> unit
+
+  val _insert_timing_code : unit -> unit
 
   val anonymous : string -> unit
 end
@@ -1109,6 +1116,8 @@ struct
     mk_dtimings F._dtimings;
     mk_dprofile F._dprofile;
 
+    mk_insert_timing_code F._insert_timing_code;
+
     mk_args F._args;
     mk_args0 F._args0;
   ]
@@ -1165,6 +1174,8 @@ struct
     mk_drawlambda F._drawlambda;
     mk_dlambda F._dlambda;
     mk_dinstr F._dinstr;
+
+    mk_insert_timing_code F._insert_timing_code;
 
     mk_args F._args;
     mk_args0 F._args0;
@@ -1310,6 +1321,8 @@ struct
     mk_dprofile F._dprofile;
     mk_dump_pass F._dump_pass;
 
+    mk_insert_timing_code F._insert_timing_code;
+
     mk_args F._args;
     mk_args0 F._args0;
   ]
@@ -1405,6 +1418,8 @@ module Make_opttop_options (F : Opttop_options) = struct
     mk_dlinear F._dlinear;
     mk_dstartup F._dstartup;
     mk_dump_pass F._dump_pass;
+
+    mk_insert_timing_code F._insert_timing_code;
   ]
 end;;
 
@@ -1451,5 +1466,7 @@ struct
     mk_vnum F._vnum;
     mk_w F._w;
     mk__ F.anonymous;
+
+    mk_insert_timing_code F._insert_timing_code;
   ]
 end;;

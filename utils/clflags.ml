@@ -140,6 +140,8 @@ let flambda_invariant_checks =
 
 let dont_write_files = ref false        (* set to true under ocamldoc *)
 
+let insert_timing_code = ref false      (* -insert-timing-code *)
+
 let std_include_flag prefix =
   if !no_std_include then ""
   else (prefix ^ (Filename.quote Config.standard_library))

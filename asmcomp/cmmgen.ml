@@ -3438,7 +3438,7 @@ let generic_functions shared units =
 
 (* Generate the entry point *)
 
-let entry_point namelist =
+let entry_point (namelist, insert_timing) =
   (* CR mshinwell: review all of these "None"s.  We should be able to at
      least have filenames for these. *)
   let dbg = Debuginfo.none in
@@ -3448,7 +3448,7 @@ let entry_point namelist =
          Cop(Caddi, [Cop(Cload (Word_int, Mutable),
                        [Cconst_symbol "caml_globals_inited"], dbg);
                      Cconst_int 1], dbg)], dbg) in
-  let body =
+  let mainbody =
     List.fold_right
       (fun name next ->
         let entry_sym = Compilenv.make_symbol ~unitname:name (Some "entry") in
@@ -3456,6 +3456,42 @@ let entry_point namelist =
                          [Cconst_symbol entry_sym], dbg),
                   Csequence(incr_global_inited, next)))
       namelist (Cconst_int 1) in
+  let body =
+    if insert_timing then
+      (
+        Prinf.printf "inserting\n";
+        Csequence(
+          Cop(
+            Cextcall(
+              "start_instr_count",
+              typ_void,
+              false,
+              None
+            ),
+            [],
+            dbg
+          ),
+          Csequence(
+            mainbody,
+            Cop(
+              Cextcall(
+                "stop_instr_count",
+                typ_void,
+                false,
+                None
+              ),
+              [],
+              dbg
+            )
+          )
+        )
+      )
+    else
+      (
+        Printf.printf "not inserting\n";
+        mainbody
+      )
+    in
   Cfunction {fun_name = "caml_program";
              fun_args = [];
              fun_body = body;

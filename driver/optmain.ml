@@ -233,6 +233,8 @@ module Options = Main_args.Make_optcomp_options (struct
   let _dprofile () = profile_columns := Profile.all_columns
   let _opaque = set opaque
 
+  let _insert_timing_code = set Clflags.insert_timing_code
+
   let _args = Arg.read_arg
   let _args0 = Arg.read_arg0
 

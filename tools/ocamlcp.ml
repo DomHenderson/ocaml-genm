@@ -129,6 +129,7 @@ module Options = Main_args.Make_bytecomp_options (struct
   let _dinstr = option "-dinstr"
   let _dtimings = option "-dtimings"
   let _dprofile = option "-dprofile"
+  let _insert_timing_code = option "-insert-timing-code"
   let _args = Arg.read_arg
   let _args0 = Arg.read_arg0
   let anonymous = process_file

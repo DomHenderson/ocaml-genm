@@ -57,6 +57,8 @@ module type Common_options = sig
   val _drawlambda : unit -> unit
   val _dlambda : unit -> unit
 
+  val _insert_timing_code : unit -> unit
+
   val anonymous : string -> unit
 end;;
 
