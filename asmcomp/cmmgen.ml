@@ -3468,13 +3468,17 @@ let entry_point namelist insert_timing =
         else
           Csequence(
             Cop(Capply typ_void, [Cconst_symbol entry_sym], dbg),
-            Csequence(incr_global_inited, next))
+            Csequence(incr_global_inited, next)
           )
+      )
       namelist (Cconst_int 1) in
   let body =
     if insert_timing then (
       Printf.printf "inserting\n";
-      Cop(Cextcall("start_instr_count", typ_void, false, None), [], dbg)
+      Csequence(
+        Cop(Cextcall("start_instr_count", typ_void, false, None), [], dbg),
+        mainbody
+      )
     ) else (
       Printf.printf "not inserting\n";
       mainbody
