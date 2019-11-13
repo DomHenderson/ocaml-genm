@@ -3438,7 +3438,7 @@ let generic_functions shared units =
 
 (* Generate the entry point *)
 
-let entry_point (namelist, insert_timing) =
+let entry_point namelist insert_timing =
   (* CR mshinwell: review all of these "None"s.  We should be able to at
      least have filenames for these. *)
   let dbg = Debuginfo.none in

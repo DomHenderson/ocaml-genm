@@ -214,7 +214,7 @@ let make_startup_file ppf units_list insert_timing_code =
   Emit.begin_assembly ();
   let name_list =
     List.flatten (List.map (fun (info,_,_) -> info.ui_defines) units_list) in
-  compile_phrase (Cmmgen.entry_point (name_list, insert_timing_code));
+  compile_phrase (Cmmgen.entry_point name_list insert_timing_code);
   let units = List.map (fun (info,_,_) -> info) units_list in
   List.iter compile_phrase (Cmmgen.generic_functions false units);
   Array.iteri
